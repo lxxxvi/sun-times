@@ -1,0 +1,9 @@
+name: sun-times
+version: 0.1.0
+
+authors:
+  - mario <github@lxxxvi.ch>
+
+crystal: 1.4.1
+
+license: MIT
