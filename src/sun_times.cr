@@ -3,6 +3,7 @@ class SunTimes
   DEGREES_PER_HOUR  = 360.0 / 24.0
   DEFAULT_ZENITH    = 90.83333
   ONE_DAY_TIME_SPAN = Time::Span.new(hours: 24)
+  SECONDS_IN_HOUR   = 3600
 
   enum EVENTS
     Rise
@@ -21,15 +22,23 @@ class SunTimes
                  @zenith = DEFAULT_ZENITH)
   end
 
+  def sunrise
+    calculate(EVENTS::Rise, @day)
+  end
+
   def sunset
     calculate(EVENTS::Set, @day)
   end
 
   def my_debug(message)
-    puts message if true
+    puts message if !ENV["DEBUG"]?.nil?
   end
 
   private def calculate(event : EVENTS, datetime : Time)
+    my_debug "..........."
+    my_debug "event: #{event}"
+    my_debug "datetime: #{datetime}"
+
     # lngHour
     longitude_hour = @longitude / DEGREES_PER_HOUR
     my_debug "longitude_hour: #{longitude_hour}"
@@ -106,7 +115,9 @@ class SunTimes
     gmt_hours += 24.0 if gmt_hours < 0
     my_debug "gmt_hours: #{gmt_hours}"
 
-    offset_hours = datetime.offset * 24.0
+    my_debug "datetime.offset: #{datetime.offset}"
+
+    offset_hours = datetime.offset / SECONDS_IN_HOUR
     my_debug "offset_hours: #{offset_hours}"
 
     if gmt_hours + offset_hours < 0
@@ -121,7 +132,10 @@ class SunTimes
     minute = hour_remainder.floor
     seconds = (hour_remainder - minute) * 60.0
 
-    Time.utc(datetime.year, datetime.month, datetime.day, hour.to_i, minute.to_i, seconds.to_i)
+    result = Time.utc(datetime.year, datetime.month, datetime.day, hour.to_i, minute.to_i, seconds.to_i)
+    my_debug "result: #{result}"
+
+    result
   end
 
   private def previous_day_in_utc(datetime)
