@@ -15,11 +15,12 @@ class SunTimes
   end
 
   def initialize(@day : Time,
-                 @latitude : Float64,
-                 @longitude : Float64,
+                 latitude : Float64,
+                 longitude : Float64,
                  @never_sets_result : Time | Nil = nil,
                  @never_rises_result : Time | Nil = nil,
                  @zenith = DEFAULT_ZENITH)
+    @location = {latitude: latitude, longitude: longitude}
   end
 
   def sunrise
@@ -40,7 +41,7 @@ class SunTimes
     my_debug "datetime: #{datetime}"
 
     # lngHour
-    longitude_hour = @longitude / DEGREES_PER_HOUR
+    longitude_hour = @location[:longitude] / DEGREES_PER_HOUR
     my_debug "longitude_hour: #{longitude_hour}"
 
     # t
@@ -83,8 +84,8 @@ class SunTimes
     my_debug "cos_declination: #{cos_declination}"
 
     cos_local_hour_angle =
-      (Math.cos(degrees_to_radians(@zenith)) - (sin_declination * Math.sin(degrees_to_radians(@latitude)))) /
-        (cos_declination * Math.cos(degrees_to_radians(@latitude)))
+      (Math.cos(degrees_to_radians(@zenith)) - (sin_declination * Math.sin(degrees_to_radians(@location[:latitude])))) /
+        (cos_declination * Math.cos(degrees_to_radians(@location[:latitude])))
     my_debug "cos_local_hour_angle: #{cos_local_hour_angle}"
 
     # the sun never rises on this location (on the specified date)
