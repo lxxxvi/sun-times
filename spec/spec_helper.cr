@@ -1,2 +1,2 @@
 require "spec"
-require "../src/sun-times"
+require "../src/sun_times"
