@@ -18,6 +18,7 @@ module Fixtures
   def time_locations(key)
     {
       los_angeles: Time::Location.load("America/Los_Angeles"),
+      tokyo:       Time::Location.load("Asia/Tokyo"),
     }[key]
   end
 end
