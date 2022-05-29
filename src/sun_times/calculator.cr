@@ -1,12 +1,14 @@
 class SunTimes
   class Calculator
-    private getter event, datetime, location, never_sets_result, never_rises_result, zenith
+    SECONDS_IN_HOUR   = 3600
+    DEGREES_PER_HOUR  = 360.0 / 24.0
+    ONE_DAY_TIME_SPAN = Time::Span.new(hours: 24)
+
+    private getter event, datetime, coordinates, zenith
 
     def initialize(@event : SunTimes::Events,
                    @datetime : Time,
-                   @location : SunTimes::Location,
-                   @never_sets_result : SunTimes::TimeOrNeverType,
-                   @never_rises_result : SunTimes::TimeOrNeverType,
+                   @coordinates : SunTimes::Coordinates,
                    @zenith : SunTimes::ZenithType)
     end
 
@@ -21,7 +23,7 @@ class SunTimes
       my_debug "datetime: #{datetime}"
 
       # lngHour
-      longitude_hour = location.longitude / DEGREES_PER_HOUR
+      longitude_hour = coordinates.longitude / DEGREES_PER_HOUR
       my_debug "longitude_hour: #{longitude_hour}"
 
       # t
@@ -64,14 +66,14 @@ class SunTimes
       my_debug "cos_declination: #{cos_declination}"
 
       cos_local_hour_angle =
-        (Math.cos(degrees_to_radians(zenith)) - (sin_declination * Math.sin(degrees_to_radians(location.latitude)))) /
-          (cos_declination * Math.cos(degrees_to_radians(location.latitude)))
+        (Math.cos(degrees_to_radians(zenith)) - (sin_declination * Math.sin(degrees_to_radians(coordinates.latitude)))) /
+          (cos_declination * Math.cos(degrees_to_radians(coordinates.latitude)))
       my_debug "cos_local_hour_angle: #{cos_local_hour_angle}"
 
-      # the sun never rises on this location (on the specified date)
-      return never_rises_result if cos_local_hour_angle > 1
-      # the sun never sets on this location (on the specified date)
-      return never_sets_result if cos_local_hour_angle < -1
+      # the sun never rises on this coordinates (on the specified date)
+      return :never if cos_local_hour_angle > 1
+      # the sun never sets on this coordinates (on the specified date)
+      return :never if cos_local_hour_angle < -1
 
       # # H
       suns_local_hour =
@@ -116,14 +118,7 @@ class SunTimes
     end
 
     private def calculate_with_other_day(datetime)
-      return self.class.new(
-        event,
-        datetime,
-        location,
-        never_sets_result,
-        never_rises_result,
-        zenith
-      ).calculate
+      return self.class.new(event, datetime, coordinates, zenith).calculate
     end
 
     private def previous_day_in_utc
